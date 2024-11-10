@@ -1,8 +1,9 @@
 import pandas as pd
 import numpy as np
 import yaml
-from sqlalchemy import create_engine, inspect
+from sqlalchemy import create_engine, inspect, text
 import psycopg2
+from psycopg2 import sql
 import os
 
 
@@ -16,16 +17,39 @@ class DatabaseConnector:
         return db_creds
     
     def init_db_engine(self, db_creds):
-        # Create a database engine
+        # Create a temporary engine to connect to the default 'postgres' database
+        temp_engine = create_engine(f"postgresql+psycopg2://{db_creds['LOCAL_USER']}:{db_creds['LOCAL_PASSWORD']}@{db_creds['LOCAL_HOST']}:{db_creds['LOCAL_PORT']}/postgres")
+        
+        # Check if the target database exists and create it if it doesn't
+        with temp_engine.connect() as conn:
+            result = conn.execute(text("SELECT 1 FROM pg_database WHERE datname = :dbname"), {'dbname': db_creds['LOCAL_DATABASE']})
+            if result.scalar() is None:
+                self.create_new_db(db_creds['LOCAL_USER'], db_creds['LOCAL_PASSWORD'], db_creds['LOCAL_HOST'], db_creds['LOCAL_PORT'], 'postgres', db_creds['LOCAL_DATABASE'])
+                print(f"Database '{db_creds['LOCAL_DATABASE']}' created successfully!")
+            else:
+                print(f"Database '{db_creds['LOCAL_DATABASE']}' already exists.")
+
+        # Create the engine for the target database
         engine = create_engine(f"{db_creds['LOCAL_DATABASE_TYPE']}+{db_creds['LOCAL_DB_API']}://{db_creds['LOCAL_USER']}:{db_creds['LOCAL_PASSWORD']}@{db_creds['LOCAL_HOST']}:{db_creds['LOCAL_PORT']}/{db_creds['LOCAL_DATABASE']}")
-        # Connect to the database
         connection = engine.connect()
-        # Print connection status
         print("Connected to the database successfully!")
-        # Take in the db_creds output and initialise and return an sql_alchemy database engine
-        return connection
+        
+        return engine, connection
     
-    def upload_to_db(self, data_frame, table_name, db_creds):
-        local_engine = create_engine(f"{db_creds['LOCAL_DATABASE_TYPE']}+{db_creds['LOCAL_DB_API']}://{db_creds['LOCAL_USER']}:{db_creds['LOCAL_PASSWORD']}@{db_creds['LOCAL_HOST']}:{db_creds['LOCAL_PORT']}/{db_creds['LOCAL_DATABASE']}")
-        local_engine.connect()
-        data_frame.to_sql(table_name, local_engine, if_exists='replace')
+    def create_replace_db_table(self, data_frame, table_name, engine):
+        data_frame.to_sql(table_name, engine, if_exists='replace')
+
+    def create_new_db(self, local_user, local_password, local_host, local_port, local_database, new_db_name):
+        conn = psycopg2.connect(
+            user =  local_user,
+            password = local_password,
+            host = local_host,
+            port = local_port,
+            database = local_database 
+            )
+        
+        conn.autocommit = True #Set to autocommit mode to ensure the action is implemented straight away
+
+        with conn.cursor() as cursor:
+            cursor.execute(sql.SQL("CREATE DATABASE {}").format(sql.Identifier(new_db_name)))
+        conn.close
