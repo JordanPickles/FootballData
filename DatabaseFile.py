@@ -1,10 +1,11 @@
-import pandas as pd
-import numpy as np
-import yaml
 from sqlalchemy import create_engine, inspect, text
 import psycopg2
 from psycopg2 import sql
 import os
+from sqlalchemy import create_engine, Column, Integer, String, Float, Date
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
+import yaml
 
 
 class DatabaseConnector:
@@ -53,3 +54,27 @@ class DatabaseConnector:
         with conn.cursor() as cursor:
             cursor.execute(sql.SQL("CREATE DATABASE {}").format(sql.Identifier(new_db_name)))
         conn.close
+
+Base = declarative_base()
+
+class ShotDataTable(Base):
+    __tablename__ = 'dim_shots'
+    
+    shot_id = Column(Integer, primary_key=True)
+    minute = Column(Integer)
+    result = Column(String)
+    X = Column(Float)
+    Y = Column(Float)
+    xG = Column(Float)
+    player = Column(String)
+    h_a = Column(String)
+    player_id = Column(Integer)
+    situation = Column(String)
+    season = Column(Integer)
+    shot_type = Column(String)
+    match_id = Column(Integer)
+    last_action = Column(String)
+    player_team = Column(String)
+    player_assisted = Column(String)
+    date = Column(Date)
+    league = Column(String)
