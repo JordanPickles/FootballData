@@ -13,16 +13,38 @@ class UnderstatDataScraper:
 
     def match_id_retrieval(self, league_list, season):
         match_id_list = []
+        match_data_list = []
         for league in league_list:
             league_matches = self.client.league(league=league).get_match_data(season=season)
-
+            
             for match in league_matches:
                 game_date = datetime.strptime(match['datetime'], '%Y-%m-%d %H:%M:%S')
                 today = datetime.today()
                 if game_date < today and match['goals']['h'] != None: #Accounts for future games and games that have been postponed
                     match_id_list.append({'id': match['id'], 'league': league})
+                    match_data_list.append({
+                        'match_id': match['id'][0],
+                        'datetime': match['datetime'],
+                        'league': league,
+                        'home_team_id': match['h']['id'],
+                        'home_team_name': match['h']['title'],
+                        'home_team_name_short': match['h']['short_title'],
+                        'away_team_id': match['a']['id'],   
+                        'away_team_name': match['a']['title'],
+                        'away_team_name_short': match['a']['short_title'],
+                        'home_team_goals': match['goals']['h'],
+                        'away_team_goals': match['goals']['a'],
+                        'home_team_xG': match['xG']['h'],
+                        'away_team_xG': match['xG']['a'],
+                        'win_forecast': match['forecast']['w'],
+                        'draw_forecast': match['forecast']['d'],
+                        'loss_forecast': match['forecast']['l']
+                        }
+                    )
+        
+        df_all_match_data = pd.DataFrame(match_data_list)
 
-        return match_id_list                
+        return df_all_match_data, match_id_list                
 
     def match_shots(self, match_id_list):
 
