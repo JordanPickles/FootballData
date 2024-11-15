@@ -2,9 +2,9 @@ from sqlalchemy import create_engine, inspect, text
 import psycopg2
 from psycopg2 import sql
 import os
-from sqlalchemy import create_engine, Column, Integer, String, Float, Date
+from sqlalchemy import create_engine, Column, Integer, String, Float, Date, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, Relationship
 import yaml
 
 
@@ -72,9 +72,25 @@ class ShotDataTable(Base):
     situation = Column(String)
     season = Column(Integer)
     shot_type = Column(String)
-    match_id = Column(Integer)
+    match_id = Column(Integer, ForeignKey('dim_match_data.match_id'))
     last_action = Column(String)
     player_team = Column(String)
     player_assisted = Column(String)
     date = Column(Date)
     league = Column(String)
+
+    match = Relationship("MatchDataTable", back_populates="shots")
+
+class MatchDataTable(Base):
+    __tablename__ = 'dim_match_data'
+    
+    match_id = Column(Integer, primary_key=True)
+    h_team = Column(String)
+    a_team = Column(String)
+    h_goals = Column(Integer)
+    a_goals = Column(Integer)
+    date = Column(Date)
+    league = Column(String)
+    season = Column(Integer)
+
+    shots = Relationship("ShotDataTable", back_populates="match")
