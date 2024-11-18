@@ -1,12 +1,14 @@
 from sqlalchemy import create_engine, inspect, text
+from sqlalchemy.dialects import postgresql
+from sqlalchemy import create_engine
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
+
 import psycopg2
 from psycopg2 import sql
 import os
-from sqlalchemy import create_engine, Column, Integer, String, Float, Date, ForeignKey
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, Relationship
-import yaml
 
+import yaml
 
 class DatabaseConnector:
     def __init__(self):
@@ -38,8 +40,13 @@ class DatabaseConnector:
         return engine, connection
     
     def create_replace_db_table(self, data_frame, table_name, engine):
-        data_frame.to_sql(table_name, engine, if_exists='replace')
-
+        batch_size=1000        
+        try:
+            data_frame.to_sql(table_name, engine, if_exists='append', index=False, chunksize=batch_size)
+            print(f"Data appended to table {table_name} successfully!")
+        except Exception as e:
+            print(f"Error appending data to table {table_name}: {e}")
+    
     def create_new_db(self, local_user, local_password, local_host, local_port, local_database, new_db_name):
         conn = psycopg2.connect(
             user =  local_user,
@@ -55,42 +62,3 @@ class DatabaseConnector:
             cursor.execute(sql.SQL("CREATE DATABASE {}").format(sql.Identifier(new_db_name)))
         conn.close
 
-Base = declarative_base()
-
-class ShotDataTable(Base):
-    __tablename__ = 'dim_shots'
-    
-    shot_id = Column(Integer, primary_key=True)
-    minute = Column(Integer)
-    result = Column(String)
-    X = Column(Float)
-    Y = Column(Float)
-    xG = Column(Float)
-    player = Column(String)
-    h_a = Column(String)
-    player_id = Column(Integer)
-    situation = Column(String)
-    season = Column(Integer)
-    shot_type = Column(String)
-    match_id = Column(Integer, ForeignKey('dim_match_data.match_id'))
-    last_action = Column(String)
-    player_team = Column(String)
-    player_assisted = Column(String)
-    date = Column(Date)
-    league = Column(String)
-
-    match = Relationship("MatchDataTable", back_populates="shots")
-
-class MatchDataTable(Base):
-    __tablename__ = 'dim_match_data'
-    
-    match_id = Column(Integer, primary_key=True)
-    h_team = Column(String)
-    a_team = Column(String)
-    h_goals = Column(Integer)
-    a_goals = Column(Integer)
-    date = Column(Date)
-    league = Column(String)
-    season = Column(Integer)
-
-    shots = Relationship("ShotDataTable", back_populates="match")
