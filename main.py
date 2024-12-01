@@ -61,6 +61,16 @@ def main():
                 logger.info("Shot data appended to database")
             else:
                 logger.info("No shot data to insert into the database.")
+
+            df_league_table = understat_data_scraper.league_table(df_match_data, league_list)
+            
+            # Append league table data to the database if not empty
+            if not df_league_table.empty:
+                connector.append_db_table(df_league_table, 'dim_league_table', engine)
+                logger.info("League table data appended to database")
+            else:
+                logger.info("No league table data to insert into the database.")
+
         else:
             logger.info("No match data to insert into the database.")
         
