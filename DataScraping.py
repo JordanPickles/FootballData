@@ -74,7 +74,6 @@ class UnderstatDataScraper:
         df_all_matches = pd.concat(match_dataframes, ignore_index=True)
         
         return df_all_matches
-
     
     def clean_shot_data(self, df_shot_data):
  
@@ -128,63 +127,6 @@ class UnderstatDataScraper:
         
         return df_team_data
     
-    def league_table(self, df_match_data, league_list):
-        df_league_table = pd.DataFrame(columns=['team_id', 'team_name', 'points', 'game_week', 'goals_for', 'goals_against', 'goal_difference'])
-        
-        for league in league_list:
-            df_league_data = df_match_data['league'] == league
-            distinct_teams = df_match_data['home_team_id'].unique()
-
-            for team in distinct_teams:
-                home_team_matches = df_match_data[df_match_data['home_team_id'] == team]
-                away_team_matches = df_match_data[df_match_data['away_team_id'] == team]
-                team_matches = pd.concat([home_team_matches, away_team_matches], ignore_index=True)
-                team_matches = team_matches.sort_values(by='datetime')
-                total_points = 0
-                game_week = 0
-                goals_for = 0
-                goals_against = 0
-                goal_difference = 0
-                team_name = team_matches['home_team_name'].iloc[0]
-                team_id = team_matches['home_team_id'].iloc[0]
-                
-                
-                for match in team_matches:
-                    game_week += 1
-                    if match['home_team_id'] == team:
-                        
-                        goals_for += match['home_team_goals']
-                        goals_against += match['away_team_goals']   
-                        goal_difference += goals_for - goals_against 
-
-                        if match['home_team_goals'] > match['away_team_goals']:
-                            total_points += 3
-                        elif match['home_team_goals'] == match['away_team_goals']:
-                            total_points += 1
-                        else: total_points += 0
-
-                    
-                    else:
-                        goals_for += match['away_team_goals']
-                        goals_against += match['home_team_goals']
-                        goal_difference += goals_for - goals_against
-                        if match['away_team_goals'] > match['home_team_goals']:
-                            total_points += 3
-                        elif match['away_team_goals'] == match['home_team_goals']:
-                            total_points += 1
-                        else: total_points += 0
-
-                    df_league_table = df_league_table.append({
-                        'team_id': team_id,
-                        'team_name': team_name,
-                        'points': total_points,
-                        'game_week': game_week,
-                        'goals_for': goals_for,
-                        'goals_against': goals_against,
-                        'goal_difference': goal_difference
-                    }, ignore_index=True)
-            
-        return df_league_table
 
 if __name__ == '__main__': 
     scraper = UnderstatDataScraper()

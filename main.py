@@ -2,7 +2,7 @@ import logging
 from datetime import datetime
 import pandas as pd
 import numpy as np
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from DatabaseFile import DatabaseConnector
 from DataScraping import UnderstatDataScraper
 from DatabaseQueries import DatabaseQueries
@@ -35,9 +35,7 @@ def main():
         # Get the maximum date from the database
         max_date = db_queries.get_max_date()
         logger.info(f"Max date: {max_date}")
-        
-        # Close the psycopg2 connection as no longer needed
-        psycopg2_connection.close()
+
         
         # Define league list and season to be used in subsequent functions
         league_list = ['EPL', 'La_Liga', 'Bundesliga', 'Serie_A', 'Ligue_1']
@@ -60,20 +58,24 @@ def main():
                 connector.append_db_table(df_clean_shot_data, 'dim_shot', engine)
                 logger.info("Shot data appended to database")
             else:
-                logger.info("No shot data to insert into the database.")
-
-            df_league_table = understat_data_scraper.league_table(df_match_data, league_list)
-            
-            # Append league table data to the database if not empty
-            if not df_league_table.empty:
-                connector.append_db_table(df_league_table, 'dim_league_table', engine)
-                logger.info("League table data appended to database")
-            else:
-                logger.info("No league table data to insert into the database.")
-
+                logger.info("No shot data to insert into the database.")  
         else:
             logger.info("No match data to insert into the database.")
         
+
+        # Calculate league positions
+        league_table = db_queries.league_table_view()
+
+        logger.info("League positions calculated")
+
+        # Export bashboard data
+        data_export = db_queries.dashboard_data_export()
+
+        logger.info("Data exported to csv successfully")
+
+        # Close the psycopg2 connection as no longer needed
+        psycopg2_connection.close()
+
         # Close the SQLAlchemy connection
         connection.close()
     except Exception as e:
