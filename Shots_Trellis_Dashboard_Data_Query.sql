@@ -37,7 +37,8 @@ tb3 as(
 select *,
 	concat(match_id, home_team_id) as home_team_match_uuid,
 	concat(match_id, away_team_id) as away_team_match_uuid
-from dim_match),
+from dim_match
+where league in ('EPL')),
 
 tb4 as(
 select 
@@ -60,10 +61,9 @@ select tb4.*,
 	lt1.league_position as away_team_league_position
 from tb4
 	left join league_table_view as lt on tb4.home_team_game_week_uuid = lt.uuid
-	left join league_table_view as lt1 on tb4.home_team_game_week_uuid = lt.uuid)
+	left join league_table_view as lt1 on tb4.away_team_game_week_uuid = lt1.uuid)
 	
-	
-	
+
 Select dim_shot.*,  
 	case 
 		when tb5.home_team_name = dim_shot.player_team then tb5.home_team_league_position
