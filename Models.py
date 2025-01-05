@@ -60,13 +60,3 @@ class Shot(Base):
     season: Mapped[int]
     match: Mapped["Match"] = Relationship(back_populates="shots")
 
-# class LeagueTable(Base):
-#     __tablename__ = 'dim_league_table'
-    
-#     team_id: Mapped[int] = mapped_column(Integer, primary_key=True)
-#     team_name: Mapped[str] = mapped_column(String(30))
-#     points: Mapped[int]
-#     game_week: Mapped[int]
-#     goals_for: Mapped[int]
-#     goals_against: Mapped[int]
-#     goal_difference: Mapped[int]

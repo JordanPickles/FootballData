@@ -43,7 +43,7 @@ class DatabaseQueries:
     def dashboard_data_export(self):
         try:
             # Read the SQL script from the file
-            with open('Shots_Trellis_Dashboard_Data_Query.sql', 'r') as file:
+            with open('Shots_Trellis_Dashboard_Data_Query_V2.sql', 'r') as file:
                 dashboard_query = file.read()
             
             cursor = self.connection.cursor()
