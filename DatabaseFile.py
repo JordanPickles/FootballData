@@ -8,6 +8,7 @@ from psycopg2 import sql
 import os
 import yaml
 
+
 class DatabaseConnector:
     def __init__(self):
         pass
