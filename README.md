@@ -1,11 +1,11 @@
-## Football Database & Visualisation
+# Football Database & Visualisation
 
 ## Project Aims
 The aim of this project was to create a Postgres database of football data from Understats API which can be used for data visualisations going forward.
 
 
 ## Data Collection & Cleaning
-Data was collected using Understat's API. Understat provides detailed football statistics and data. You can find more information and the documentation for the Understat API [here](https://understat.com/).
+Data was collected using Understat's API. Understat provides detailed football statistics and data. You can find more information and the documentation for the Understat API [here]([https://understat.com/](https://understat.readthedocs.io/en/latest/)).
 This project used the Shots and Match method provided by the API. Using pythons pandas package a minimal amount of data cleaning was carried out to ensure the data was clean and in the desired format before loading the data into a database.
 
 ## Database Management
