@@ -45,18 +45,6 @@ class DatabaseConnector:
             Exception: If there is an error initializing the database engine.
         """
         try:
-            # Create a temporary engine to connect to the default 'postgres' database
-            temp_engine = create_engine(f"postgresql+psycopg2://{db_creds['LOCAL_USER']}:{db_creds['LOCAL_PASSWORD']}@{db_creds['LOCAL_HOST']}:{db_creds['LOCAL_PORT']}/postgres")
-            
-            # Check if the target database exists and create it if it doesn't
-            with temp_engine.connect() as conn:
-                result = conn.execute(text("SELECT 1 FROM pg_database WHERE datname = :dbname"), {'dbname': db_creds['LOCAL_DATABASE']})
-                if result.scalar() is None:
-                    self.create_new_db(psycopg2_connection, db_creds)
-                    print(f"Database '{db_creds['LOCAL_DATABASE']}' created successfully!")
-                else:
-                    print(f"Database '{db_creds['LOCAL_DATABASE']}' already exists.")
-
             # Create the engine for the target database
             engine = create_engine(f"{db_creds['LOCAL_DATABASE_TYPE']}+{db_creds['LOCAL_DB_API']}://{db_creds['LOCAL_USER']}:{db_creds['LOCAL_PASSWORD']}@{db_creds['LOCAL_HOST']}:{db_creds['LOCAL_PORT']}/{db_creds['LOCAL_DATABASE']}")
             connection = engine.connect()
@@ -83,9 +71,9 @@ class DatabaseConnector:
             Exception: If there is an error connecting to the database, an exception is raised and the error message is printed.
         """
 
-        # Connects to the database
+        # Connects to the database if created, if not created it connects to the server
         try:
-            connection = psycopg2.connect(
+            psycopg2_connection = psycopg2.connect(
             dbname = db_creds['LOCAL_DATABASE'],
             user = db_creds['LOCAL_USER'],
             password = db_creds['LOCAL_PASSWORD'],
@@ -93,9 +81,20 @@ class DatabaseConnector:
             port = db_creds['LOCAL_PORT']
             )
             print("Connected to the database successfully!")
-            return connection
+
         except Exception as e:
+            psycopg2_connection = psycopg2.connect(
+            user = db_creds['LOCAL_USER'],
+            password = db_creds['LOCAL_PASSWORD'],
+            host = db_creds['LOCAL_HOST'],
+            port = db_creds['LOCAL_PORT']
+            )
             print(f"Error connecting to database: {e}")
+            print("Connected to the server successfully!")
+
+            self.create_new_db(psycopg2_connection, db_creds['LOCAL_DATABASE'])
+
+        return psycopg2_connection
     
     def create_new_db(self, psycopg2_connection, new_db_name):
         """

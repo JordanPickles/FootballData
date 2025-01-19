@@ -24,6 +24,7 @@ def main():
         # Establish database connections
         psycopg2_connection = connector.psycopg2_connect(db_creds)
         engine, connection = connector.init_db_engine(db_creds, psycopg2_connection)
+ 
         
         # Initialize database queries
         db_queries = DatabaseQueries(psycopg2_connection)

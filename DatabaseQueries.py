@@ -25,7 +25,7 @@ class DatabaseQueries:
             cursor.execute(query)
             max_date = cursor.fetchone()[0]
             cursor.close()
-            if max_date == None:
+            if max_date == None or max_date == 0:
                 return datetime(1900, 1, 1) # Returns a date should no date be found: e.g. the first time the code is run so that the rest of the code can stil run returning all matches
             return max_date
         except Exception as e:

@@ -107,45 +107,28 @@ class UnderstatDataScraper:
         Returns:
             pd.DataFrame: Cleaned and processed DataFrame with shot data.
         """
+        #Removes any apostrophe's from the column
         for col in ['X', 'Y', 'xG']:
-            df_shot_data[col] = df_shot_data[col].astype(str).str.replace("'", "", regex=False) #Removes any apostrophe's from the column
+            df_shot_data[col] = df_shot_data[col].astype(str).str.replace("'", "", regex=False) 
         
-        df_shot_data = df_shot_data.rename(columns={
-            'id':'shot_id',
-            'shotType':'shot_type',
-            'lastAction':'last_action',
-            'xG':'xg',
-            'X':'x',
-            'Y':'y',}) # Renames columns
+        # Renames the columns to more readable names
+        df_shot_data = df_shot_data.rename(columns={ 
+            'id':'shot_id', 'shotType':'shot_type', 'lastAction':'last_action', 'xG':'xg', 'X':'x', 'Y':'y',}) 
         
-        # Finds the team of the player taking the shot
+        # Finds the team of the player taking the shot and then drops the columns not required
         df_shot_data['player_team'] = np.where(df_shot_data['h_a'] == 'h', df_shot_data['h_team'], df_shot_data['a_team'])
         df_shot_data['team_against'] = np.where(df_shot_data['h_a'] == 'h', df_shot_data['a_team'], df_shot_data['h_team'])
-        
-        df_shot_data = df_shot_data.drop(columns=['h_team', 'a_team', 'h_goals', 'a_goals']) # Drops columns not required
+        df_shot_data = df_shot_data.drop(columns=['h_team', 'a_team', 'h_goals', 'a_goals'])
 
+        # Converts the data types of the columns to the correct data types
         df_shot_data = df_shot_data.astype({
-            'shot_id': 'int',
-            'minute': 'int',
-            'result': 'str',
-            'x': 'float',
-            'y': 'float',
-            'xg': 'float',
-            'player': 'str',
-            'h_a': 'str',
-            'player_id': 'int',
-            'situation': 'str',
-            'season': 'int',
-            'shot_type': 'str',
-            'last_action': 'str',
-            'player_team': 'str',
-            'player_assisted': 'str',
-            'date': 'datetime64[ns]',
-            'league': 'str',
-            'team_against': 'str',
-            'match_id': 'int'
-        })
-        df_shot_data['x'] = df_shot_data['x']*120 #Converts data into coordinates suitable to use on pitch maps
+            'shot_id': 'int', 'minute': 'int', 'result': 'str', 'x': 'float', 'y': 'float', 'xg': 'float', 'player': 'str',
+            'h_a': 'str', 'player_id': 'int', 'situation': 'str', 'season': 'int', 'shot_type': 'str', 'last_action': 'str',
+            'player_team': 'str', 'player_assisted': 'str', 'date': 'datetime64[ns]', 'league': 'str', 'team_against': 'str',
+            'match_id': 'int'})
+        
+        #Converts data into coordinates suitable to use on pitch maps
+        df_shot_data['x'] = df_shot_data['x']*120 
         df_shot_data['y'] = df_shot_data['y']*80
 
         return df_shot_data
