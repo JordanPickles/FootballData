@@ -1,4 +1,4 @@
-# Football Database & Visualisation
+# ETL and Data Visualisation - End to End Project
 
 ## Project Aims
 The aim of this project was to create a Postgres database of football data from Understats API which can be used for data visualisations going forward.
