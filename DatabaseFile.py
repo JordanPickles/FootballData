@@ -25,7 +25,7 @@ class DatabaseConnector:
             db_creds = yaml.safe_load(f)
         return db_creds
     
-    def init_db_engine(self, db_creds, psycopg2_connection):
+    def init_db_engine(self, db_creds):
         """
         Initializes the database engine and connects to the specified database.
         Parameters:
@@ -49,7 +49,6 @@ class DatabaseConnector:
             engine = create_engine(f"{db_creds['LOCAL_DATABASE_TYPE']}+{db_creds['LOCAL_DB_API']}://{db_creds['LOCAL_USER']}:{db_creds['LOCAL_PASSWORD']}@{db_creds['LOCAL_HOST']}:{db_creds['LOCAL_PORT']}/{db_creds['LOCAL_DATABASE']}")
             connection = engine.connect()
             print("Connected to the database successfully!")
-            
             return engine, connection
         
         except Exception as e:
@@ -108,7 +107,8 @@ class DatabaseConnector:
             Exception: If there is an error creating the database.
         """
         try:
-            psycopg2_connection.autocommit = True  # Set to autocommit mode to ensure the action is implemented straight away
+            # Set to autocommit mode to ensure the action is implemented straight away
+            psycopg2_connection.autocommit = True  
 
             with psycopg2_connection.cursor() as cursor:
                 cursor.execute(sql.SQL("CREATE DATABASE {}").format(sql.Identifier(new_db_name)))
