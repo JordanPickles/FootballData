@@ -83,15 +83,24 @@ class DatabaseConnector:
 
         except Exception as e:
             psycopg2_connection = psycopg2.connect(
-            user = db_creds['LOCAL_USER'],
-            password = db_creds['LOCAL_PASSWORD'],
-            host = db_creds['LOCAL_HOST'],
-            port = db_creds['LOCAL_PORT']
-            )
+                user = db_creds['LOCAL_USER'],
+                password = db_creds['LOCAL_PASSWORD'],
+                host = db_creds['LOCAL_HOST'],
+                port = db_creds['LOCAL_PORT']
+                )
             print(f"Error connecting to database: {e}")
             print("Connected to the server successfully!")
 
             self.create_new_db(psycopg2_connection, db_creds['LOCAL_DATABASE'])
+
+            psycopg2_connection = psycopg2.connect(
+                dbname = db_creds['LOCAL_DATABASE'],
+                user = db_creds['LOCAL_USER'],
+                password = db_creds['LOCAL_PASSWORD'],
+                host = db_creds['LOCAL_HOST'],
+                port = db_creds['LOCAL_PORT']
+            )
+            print("Connected to the database successfully!")
 
         return psycopg2_connection
     
